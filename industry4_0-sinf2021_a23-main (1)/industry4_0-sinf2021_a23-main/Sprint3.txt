@@ -1,0 +1,17 @@
+sinf2021a23
+QkYgVxMv
+
+1) Sensor Data
+SELECT time_stamp AS timestamp, valor AS measurement FROM sprint2.historico_sensor WHERE sensor = 'Luz_1' AND time_stamp BETWEEN '2021-05-16 11:40:58' AND '2021-05-16 11:42:56'
+
+2) Actuator Data
+Select atuador,time_stamp,estado FROM ( select atuador, ROW_NUMBER() OVER(partition by atuador order by time_stamp desc) as contagem, time_stamp, estado from sprint2.historico_atuador )a WHERE contagem=1;
+
+3) Configuration Data
+UPDATE sprint2.sensor SET mote = 3 WHERE nome = 'Luz_1'; UPDATE sprint2.sensor SET mote = 1 WHERE nome = 'Luz_3'; SELECT nome, mote FROM sprint2.sensor WHERE nome = 'Luz_1' OR nome = 'Luz_3'
+
+4) Control Rules Data
+UPDATE sprint2.regras SET valor = 700 WHERE id_regra = 1; SELECT regras.id_regra AS rule, sensor.mote AS cell, regras.valor AS reference_value, regras.sensor FROM sprint2.regras JOIN sprint2.sensor ON id_regra = 1 AND id = 1
+
+5) Energy Data
+SELECT time_stamp AS timestamp, valor*220*((DATE_PART('second', time_stamp::timestamp - LAG(time_stamp,1) OVER ( PARTITION BY sensor ORDER BY mediçao )::timestamp) / 60 + DATE_PART('minute', time_stamp::timestamp - LAG(time_stamp,1) OVER ( PARTITION BY sensor ORDER BY mediçao )::timestamp)) / 60 + DATE_PART('hour', time_stamp::timestamp - LAG(time_stamp,1) OVER ( PARTITION BY sensor ORDER BY mediçao )::timestamp)) AS energy FROM sprint2.historico_sensor WHERE sensor='Curr_1' AND time_stamp BETWEEN '2021-05-16 11:40:12' AND '2021-05-16 11:44:21';
